@@ -1,15 +1,26 @@
+"""
 <plugin key="SensairS8" name="Sensair S8 CO sensor" author="artbern" version="1.0.0" wikilink="https://github.com/ArtBern/Domoticz-SensairS8-plugin" externallink="https://github.com/ArtBern/Domoticz-SensairS8-plugin">
     <description>
         <h2>Sensair S8 CO2 sensor</h2><br/>
         Read PPM values from Sensair S8 CO2 sensor
         <h3>Devices</h3>
         <ul style="list-style-type:square">
-            <li>Device Type - What it does...</li>
+            <li>Air Quality - measures CO2 concentration</li>
         </ul>
         <h3>Configuration</h3>
-        Configuration options...
+        Specify serial port, baud rate and timeout 
     </description>
     <params>
+        <param field="Mode1" label="Serial Port" width="100px" required="true" default="/dev/ttyS0"/>
+        <param field="Mode2" label="Serial Baudrate" width="60px" required="true" default="9600"/>
+        <param field="Mode3" label="Serial timeout" width="60px" required="true" default="0.5"/>
+        <param field="Mode6" label="Debug" width="100px">
+            <options>
+                <option label="True" value="Debug"/>
+                <option label="False" value="Normal"  default="true" />
+                <option label="Logging" value="File"/>
+            </options>
+        </param>
     </params>
 </plugin>
 """
@@ -18,24 +29,24 @@ import time
 import serial
 
 class BasePlugin:
-    enabled = False
+    
     def __init__(self):
-        var port = "/dev/ttyS0"
-        var baudrate = 9600
-        var timeout = .5
-        self.ser = serial.Serial(port, baudrate=baudrate, timeout=timeout)
-        self.ser.flushInput()        
+        return
 
     def onStart(self):
         Domoticz.Log("onStart called")
         if Parameters["Mode6"] == "Debug":
             Domoticz.Debugging(1)
 
+        DumpConfigToLog()
+
+        self.ser = serial.Serial(Parameters['Mode1'], baudrate=int(Parameters['Mode2']), timeout=float(Parameters['Mode3']))
+        self.ser.flushInput()        
+
         if (len(Devices) == 0):
             Domoticz.Device(Name="Sensair S8", Unit=1, TypeName="Air Quality", Used=1).Create()
 
         Domoticz.Debug("Device created.")
-        DumpConfigToLog()
 
 
     def onStop(self):
